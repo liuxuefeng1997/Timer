@@ -65,4 +65,3 @@ class MessageBox_Exit(QDialog):
 
     def get_result(self):
         return self.user_choice, self.remember_choice
-

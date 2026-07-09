@@ -28,7 +28,7 @@ if __name__ == '__main__':
             add += ' --add-data="sources\\*:.\\sources"'
             add += ' --add-data="plugins\\*:.\\plugins"'
             add += ' --windowed'
-        cmd += f".\\.venv\\Scripts\\pyinstaller.exe -F {name}.py{add} -n {title.replace(' ', '_')} -i sources\\repo.ico\n"
+        cmd += f"..\\repo_launcher\\.venv\\Scripts\\pyinstaller.exe -F {name}.py{add} -n {title.replace(' ', '_')} -i sources\\timer.ico\n"
     print("[Info]\033[35m正在构建编译脚本\033[0m")
     with open("build.cmd", "w", encoding="utf8") as f:
         f.write(f'{cmd}')

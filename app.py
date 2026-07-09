@@ -4,7 +4,7 @@ from ui.main import mainWindow
 from lib.core import *
 
 
-class RepoLauncherApplication(QApplication):
+class TimerApplication(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         # 初始化应用程序
@@ -26,7 +26,7 @@ class RepoLauncherApplication(QApplication):
 
 
 def init_ui():
-    app = RepoLauncherApplication(sys.argv)
+    app = TimerApplication(sys.argv)
     # 已有实例运行时直接退出新实例
     if app.is_running:
         sys.exit(1)

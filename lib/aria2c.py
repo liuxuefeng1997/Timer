@@ -9,7 +9,7 @@ class Aria2cDownload(QThread):
     isStart = pyqtSignal(bool)
     add_status = pyqtSignal(str)
 
-    def __init__(self, uri, keys, _dir=run_path, rpc_host='localhost', rpc_port=6800, rpc_secret=None, isUpdate=False):
+    def __init__(self, uri, keys, _dir=run_path, rpc_host='localhost', rpc_port=6897, rpc_secret=None, isUpdate=False):
         super(Aria2cDownload, self).__init__()
 
         self.curr_key = keys if isUpdate else ""
@@ -459,11 +459,6 @@ class Aria2cManager(QThread):
             # 检查我们启动的进程
             if self.aria2c_process and self.aria2c_process.poll() is None:
                 return True
-
-            # 检查系统中所有的aria2c进程
-            for proc in psutil.process_iter(['name']):
-                if proc.info['name'] and 'aria2c' in proc.info['name'].lower():
-                    return True
 
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass

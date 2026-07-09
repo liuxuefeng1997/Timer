@@ -17,6 +17,7 @@ def checkRun(process_name):
 
 if __name__ == '__main__':
     opts = None
+    updateExeName = f"{app_name}.exe"
     try:
         opts, args = getopt.getopt(sys.argv[1:], "n:", ["new"])
     except getopt.GetoptError:
@@ -27,20 +28,20 @@ if __name__ == '__main__':
                 if os.path.exists(arg):
                     print(f"[{app_name} | 更新] 准备开始更新")
                     for s in range(1, 60):
-                        if checkRun("R.E.P.O.Launcher.exe"):
+                        if checkRun(updateExeName):
                             print(f"[{app_name} | 更新] 等待程序结束 {s}")
                         else:
                             break
                         time.sleep(1)
                     print(f"[{app_name} | 更新] 正在更新至版本：{arg}")
-                    if os.path.exists("R.E.P.O.Launcher.exe"):
-                        os.remove("R.E.P.O.Launcher.exe")
-                    os.rename(arg, "R.E.P.O.Launcher.exe")
+                    if os.path.exists(updateExeName):
+                        os.remove(updateExeName)
+                    os.rename(arg, updateExeName)
                     print(f"[{app_name} | 更新] 更新完成，准备重启")
                     for s in reversed(range(1, 4)):
                         print(f"[{app_name} | 更新] 准备重启 {s}")
                         time.sleep(1)
-                    os.system('start R.E.P.O.Launcher.exe')
+                    os.system(f'start {updateExeName}')
                 else:
                     print("更新数据未找到")
             else:

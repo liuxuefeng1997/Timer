@@ -9,21 +9,17 @@ import requests as requests
 from PyQt6.QtCore import *
 
 from data.api_setting import TencentCloud
-from data.appInfo import ver, game_appId, game_name, patch_type
+from data.appInfo import ver, app_name
 from lib.path import *
 from lib.config import Config
 
 run_path = os.getcwd()
-config_path = os.path.join(run_path, "config")
-backup_path = os.path.join(run_path, "backups")
-log_path = os.path.join(run_path, "logs")
+config_path = os.path.join(run_path, "Timer", "config")
+log_path = os.path.join(run_path, "Timer", "logs")
 plugin_path = resource_path("plugins")
 source_path = resource_path("sources")
-localLow_path = os.path.expandvars(r"%localappdata%Low")
-game_save_path = os.path.join(localLow_path, r"semiwork\Repo\saves")
-aria2_path = os.path.join(plugin_path, "aria2c.exe")
-self_uuid = hashlib.md5(f"{game_name}{game_appId}{patch_type}{run_path}".encode("utf8")).hexdigest()
-save_pwd = "Why would you want to cheat?... :o It's no fun. :') :'D"
+aria2_path = os.path.join(plugin_path, "timer_aria2c.exe")
+self_uuid = hashlib.md5(f"{app_name}{run_path}".encode("utf8")).hexdigest()
 config = Config(config_path)
 
 
@@ -37,7 +33,7 @@ def init_log():
         logging.basicConfig(
             level=logLevel,
             format='[%(asctime)s][%(levelname)s] %(message)s',
-            handlers=[logging.FileHandler(filename=os.path.join(log_path, f'log_{NOW_TIME_WITH_NO_SPACE}.txt'), mode='w', encoding='utf-8')]
+            handlers=[logging.FileHandler(filename=os.path.join(log_path, f'Log_{NOW_TIME_WITH_NO_SPACE}.txt'), mode='w', encoding='utf-8')]
         )
     else:
         logging.basicConfig(
@@ -84,19 +80,6 @@ def checkRun(process_name):
         if process.info['name'] == process_name:
             return process.info['pid']
     return False
-
-
-def get_path_as_reg(steamAppID):
-    try:
-        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, rf'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App {steamAppID}')
-        value_name = "InstallLocation"
-        data, type_no = winreg.QueryValueEx(key, value_name)
-        # print(data)  # 输出：no 1
-        winreg.CloseKey(key)
-        return f'{data}'
-    except FileNotFoundError as e:
-        logging.debug(f"[Core] {e}")
-        return None
 
 
 def getCOSConfJsonObject(uri: str) -> dict:
@@ -148,6 +131,14 @@ def generateFilenameWithDatetime(prefix="", suffix="", extension="", include_tim
         filename = f"{filename}.{extension.lstrip('.')}"
 
     return filename
+
+
+def get_digit(num, position):
+    """
+    提取数值的指定位数字
+    position: 0=个位, 1=十位, 2=百位, 以此类推
+    """
+    return (num // (10 ** position)) % 10
 
 
 class checkUpdate(QThread):
@@ -206,11 +197,10 @@ class CleanupThread(QThread):
     def run(self):
         try:
             logging.info("[Core] 进行后台执行清理线程")
-            self.parent.chkGame.stop_checking()
             logging.info("[Core] 正在关闭aria2c...")
             if self.parent.aria2c_manager:
                 self.parent.aria2c_manager.stop_aria2c()
-            pid = checkRun("aria2c.exe")
+            pid = checkRun("timer_aria2c.exe")
             if pid:
                 psutil.Process(pid).kill()
             logging.info("[Core] 程序已结束")
