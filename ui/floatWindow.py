@@ -8,6 +8,7 @@ class floatWindow(QWidget):
         self.setWindowTitle("悬浮窗")
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint, True)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+        self.setWindowFlag(Qt.WindowType.WindowTransparentForInput, True)
         self.setWindowFlag(Qt.WindowType.Tool, True)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.resize(260, 111)
@@ -53,12 +54,3 @@ class floatWindow(QWidget):
         self.timer_min_01.setText(self.parent.timer_min_01.text())
         self.timer_sec_10.setText(self.parent.timer_sec_10.text())
         self.timer_sec_01.setText(self.parent.timer_sec_01.text())
-
-    def mousePressEvent(self, a0, QMouseEvent=None):
-        pass
-
-    def mouseMoveEvent(self, a0, QMouseEvent=None):
-        pass
-
-    def mouseReleaseEvent(self, a0, QMouseEvent=None):
-        pass

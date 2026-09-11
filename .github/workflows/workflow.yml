@@ -54,13 +54,14 @@ jobs:
           $archivePath = Join-Path $env:GITHUB_WORKSPACE "$archiveName"
           Compress-Archive -Path "$staging\*" -DestinationPath $archivePath -Force
 
-          $commitMessage = git log -1 --pretty=%B
+          $commitMessage = (git log -1 --pretty=%B | Out-String).TrimEnd("`r", "`n")
           $notesPath = Join-Path $env:RUNNER_TEMP "release-notes.md"
-          @"
-          ## 更新日志：
-
-          $commitMessage
-          "@ | Set-Content -Path $notesPath -Encoding utf8
+          $releaseNotes = "## 更新日志：`r`n`r`n$commitMessage`r`n"
+          [System.IO.File]::WriteAllText(
+            $notesPath,
+            $releaseNotes,
+            [System.Text.UTF8Encoding]::new($false)
+          )
 
           "archive=$archivePath" >> $env:GITHUB_OUTPUT
           "tag=$version" >> $env:GITHUB_OUTPUT
