@@ -35,14 +35,28 @@ runs:
           throw "Unable to read app_name from data\appInfo.py"
         }
 
-        python -m PyInstaller `
-          --clean `
-          --noconfirm `
-          --onefile `
-          --windowed `
-          --name $appName `
-          --icon sources\timer.ico `
-          --add-data "sources;sources" `
-          --add-data "plugins;plugins" `
-          --distpath .release_build `
-          app.py
+        $outputDir = Join-Path $env:GITHUB_WORKSPACE ".release_build"
+        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+        $pyinstallerArgs = @(
+          "--clean",
+          "--noconfirm",
+          "--onefile",
+          "--windowed",
+          "--name", $appName,
+          "--icon", (Join-Path $env:GITHUB_WORKSPACE "sources\timer.ico"),
+          "--add-data", "$(Join-Path $env:GITHUB_WORKSPACE 'sources');sources",
+          "--add-data", "$(Join-Path $env:GITHUB_WORKSPACE 'plugins');plugins",
+          "--distpath", $outputDir,
+          (Join-Path $env:GITHUB_WORKSPACE "app.py")
+        )
+        & python -m PyInstaller @pyinstallerArgs
+        if ($LASTEXITCODE -ne 0) {
+          throw "PyInstaller failed with exit code $LASTEXITCODE"
+        }
+
+        $exePath = Join-Path $outputDir "$appName.exe"
+        if (-not (Test-Path $exePath)) {
+          Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse -Filter *.exe |
+            Select-Object -ExpandProperty FullName
+          throw "PyInstaller completed without creating $exePath"
+        }
