@@ -95,12 +95,12 @@ Running `build.py` creates the update package; it is not the standalone applicat
 python build.py
 ```
 
-GitHub Actions 会额外构建 `Timer.exe`，并将以下文件上传到 Artifact；创建 `v*` 标签时还会发布到 GitHub Release：
+GitHub Actions 只构建独立的 `Timer.exe`，并将其与本文件打包成 `${app_name}_${ver}.zip`；主分支推送或手动运行工作流成功后，会自动创建对应版本的 GitHub Release。更新包需要在本地运行 `build.py` 生成：
 
-GitHub Actions also builds `Timer.exe` separately. The following files are uploaded as workflow artifacts and are published to a GitHub Release when a `v*` tag is created:
+GitHub Actions only builds the standalone `Timer.exe`, packages it together with this README as `${app_name}_${ver}.zip`, and automatically creates the corresponding GitHub Release after a successful push to the main branch or a manual workflow run. The update package must be generated locally with `build.py`:
 
 - `.release_build/Timer.exe`
-- `.release_build/*_update.data`
+- `.release_build/Timer_v6.0.2609.11.4.zip`
 
 ## 日志与配置 | Logs and Configuration
 

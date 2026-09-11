@@ -2,8 +2,9 @@ name: Timer CI
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+      - master
   pull_request:
   workflow_dispatch:
 
@@ -12,12 +13,12 @@ permissions:
 
 jobs:
   build:
-    name: Build Windows package
+    name: Build Windows executable
     runs-on: windows-latest
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build Timer
         uses: ./.github/actions
@@ -25,17 +26,48 @@ jobs:
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: timer-package
-          path: |
-            .release_build/*.data
-            .release_build/*.exe
+          name: timer-executable
+          path: .release_build/*.exe
+          if-no-files-found: error
+
+      - name: Create release archive
+        if: github.event_name != 'pull_request'
+        id: package
+        shell: pwsh
+        run: |
+          $appInfo = Get-Content data\appInfo.py -Raw
+          $appName = [regex]::Match($appInfo, 'app_name\s*=\s*"([^"]+)"').Groups[1].Value
+          $version = [regex]::Match($appInfo, 'ver\s*=\s*"([^"]+)"').Groups[1].Value
+
+          if ([string]::IsNullOrWhiteSpace($appName) -or [string]::IsNullOrWhiteSpace($version)) {
+            throw "Unable to read app_name or ver from data\appInfo.py"
+          }
+
+          $archiveName = "${appName}_${version}.zip"
+          $staging = Join-Path $env:RUNNER_TEMP "timer-release"
+          New-Item -ItemType Directory -Path $staging -Force | Out-Null
+          Copy-Item ".release_build\${appName}.exe" "$staging\${appName}.exe"
+          Copy-Item "README.md" "$staging\README.md"
+          Compress-Archive -Path "$staging\*" -DestinationPath ".release_build\$archiveName" -Force
+
+          "archive=.release_build/$archiveName" >> $env:GITHUB_OUTPUT
+          "tag=v$version" >> $env:GITHUB_OUTPUT
+          "name=$appName $version" >> $env:GITHUB_OUTPUT
+
+      - name: Upload release archive
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: timer-release
+          path: ${{ steps.package.outputs.archive }}
           if-no-files-found: error
 
       - name: Publish GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            .release_build/*.data
-            .release_build/*.exe
+          tag_name: ${{ steps.package.outputs.tag }}
+          name: ${{ steps.package.outputs.name }}
+          files: ${{ steps.package.outputs.archive }}
           generate_release_notes: true
+          make_latest: true
