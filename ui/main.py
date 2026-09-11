@@ -82,22 +82,22 @@ class mainWindow(QMainWindow):
 
         self.startButton = QPushButton(self)
         self.startButton.setText("开始")
-        self.startButton.setGeometry(5, 80, 60, 30)
+        self.startButton.setGeometry(5, 80, 50, 30)
         self.startButton.clicked.connect(self.startTime)
 
         self.stopButton = QPushButton(self)
         self.stopButton.setText("停止")
-        self.stopButton.setGeometry(65, 80, 60, 30)
+        self.stopButton.setGeometry(55, 80, 50, 30)
         self.stopButton.clicked.connect(self.stopTime)
 
         self.timeSettingButton = QPushButton(self)
         self.timeSettingButton.setText("时间设置")
-        self.timeSettingButton.setGeometry(125, 80, 60, 30)
+        self.timeSettingButton.setGeometry(105, 80, 70, 30)
         self.timeSettingButton.clicked.connect(lambda: timeSettingWindow(self).show() if not self.Timer.isActive() else QMessageBox.warning(self, "警告", "请先停止倒计时再更改时间"))
 
         self.hotkeySettingButton = QPushButton(self)
         self.hotkeySettingButton.setText("热键设置")
-        self.hotkeySettingButton.setGeometry(185, 80, 60, 30)
+        self.hotkeySettingButton.setGeometry(175, 80, 70, 30)
         self.hotkeySettingButton.clicked.connect(lambda: hotkeySettingWindow(self).show())
 
         self.Timer = QTimer(self)

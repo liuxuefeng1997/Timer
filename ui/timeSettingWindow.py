@@ -17,7 +17,8 @@ class timeSettingWindow(QDialog):
         self.timeEdit = QTimeEdit(self)
         self.timeEdit.setTimeRange(QTime(0, 0, 5), QTime(0, 59, 59))
         self.timeEdit.setDisplayFormat("mm:ss")
-        self.timeEdit.setGeometry(5, 5, 140, 20)
+        self.timeEdit.setGeometry(5, 5, 140, 40)
+        self.timeEdit.setStyleSheet("font-size: 20px;")
 
         minute = config.read("gui.json", "time", "min", 3)
         sec = config.read("gui.json", "time", "sec", 0)

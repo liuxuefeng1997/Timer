@@ -54,9 +54,18 @@ jobs:
           $archivePath = Join-Path $env:GITHUB_WORKSPACE "$archiveName"
           Compress-Archive -Path "$staging\*" -DestinationPath $archivePath -Force
 
+          $commitMessage = git log -1 --pretty=%B
+          $notesPath = Join-Path $env:RUNNER_TEMP "release-notes.md"
+          @"
+          ## 更新日志：
+
+          $commitMessage
+          "@ | Set-Content -Path $notesPath -Encoding utf8
+
           "archive=$archivePath" >> $env:GITHUB_OUTPUT
           "tag=$version" >> $env:GITHUB_OUTPUT
           "name=$appName $version" >> $env:GITHUB_OUTPUT
+          "notes=$notesPath" >> $env:GITHUB_OUTPUT
 
       - name: Upload release archive
         if: github.event_name != 'pull_request'
@@ -73,5 +82,6 @@ jobs:
           tag_name: ${{ steps.package.outputs.tag }}
           name: ${{ steps.package.outputs.name }}
           files: ${{ steps.package.outputs.archive }}
-          generate_release_notes: true
+          body_path: ${{ steps.package.outputs.notes }}
+          generate_release_notes: false
           make_latest: true
