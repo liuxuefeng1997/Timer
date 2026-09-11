@@ -76,13 +76,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release view "${{ steps.app_info.outputs.version }}" --repo "${{ github.repository }}" *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $ghExitCode = $LASTEXITCODE
+          if ($ghExitCode -eq 0) {
             "exists=true" >> $env:GITHUB_OUTPUT
-          } elseif ($LASTEXITCODE -eq 1) {
+          } elseif ($ghExitCode -eq 1) {
             "exists=false" >> $env:GITHUB_OUTPUT
           } else {
             throw "Failed to check whether release '${{ steps.app_info.outputs.version }}' exists"
           }
+          exit 0
 
       - name: Create release archive
         if: github.event_name != 'pull_request' && steps.release_check.outputs.exists != 'true'
