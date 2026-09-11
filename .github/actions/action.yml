@@ -1,0 +1,53 @@
+name: Build Timer
+description: Set up Python, install build dependencies, validate the source, and package Timer.
+author: liuxf
+
+inputs:
+  python-version:
+    description: Python version used to build the application.
+    required: false
+    default: "3.11"
+  build:
+    description: Whether to run the PyInstaller packaging step.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install dependencies
+      shell: pwsh
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install PyQt6 psutil requests pynput pyinstaller
+
+    - name: Validate Python sources
+      shell: pwsh
+      run: |
+        python -m compileall -q app.py update.py ui lib data
+
+    - name: Build package
+      if: ${{ inputs.build == 'true' }}
+      shell: pwsh
+      run: python build.py
+
+    - name: Build standalone executable
+      if: ${{ inputs.build == 'true' }}
+      shell: pwsh
+      run: |
+        python -m PyInstaller `
+          --clean `
+          --noconfirm `
+          --onefile `
+          --windowed `
+          --name Timer `
+          --icon sources\timer.ico `
+          --add-data "sources\*;sources" `
+          --add-data "plugins\*;plugins" `
+          --distpath .release_build `
+          app.py

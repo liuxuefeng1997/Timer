@@ -15,6 +15,7 @@ if __name__ == '__main__':
         ("app", appInfo.app_name, appInfo.ver)
     ]
     cmd = "@echo off\nchcp 65001\n\ncd %~dp0\n\n"
+    pyinstaller = f'"{sys.executable}" -m PyInstaller'
     print("[Info]\033[35m数据初始化完成\033[0m")
     print("[Info]\033[35m清理历史编译\033[0m")
     if os.path.exists(os.path.join(os.path.abspath("."), "dist")):
@@ -28,7 +29,7 @@ if __name__ == '__main__':
             add += ' --add-data="sources\\*:.\\sources"'
             add += ' --add-data="plugins\\*:.\\plugins"'
             add += ' --windowed'
-        cmd += f"..\\repo_launcher\\.venv\\Scripts\\pyinstaller.exe -F {name}.py{add} -n {title.replace(' ', '_')} -i sources\\timer.ico\n"
+        cmd += f"{pyinstaller} -F {name}.py{add} -n {title.replace(' ', '_')} -i sources\\timer.ico\n"
     print("[Info]\033[35m正在构建编译脚本\033[0m")
     with open("build.cmd", "w", encoding="utf8") as f:
         f.write(f'{cmd}')
