@@ -55,7 +55,7 @@ jobs:
           Compress-Archive -Path "$staging\*" -DestinationPath $archivePath -Force
 
           "archive=$archivePath" >> $env:GITHUB_OUTPUT
-          "tag=v$version" >> $env:GITHUB_OUTPUT
+          "tag=$version" >> $env:GITHUB_OUTPUT
           "name=$appName $version" >> $env:GITHUB_OUTPUT
 
       - name: Upload release archive
