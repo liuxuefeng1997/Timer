@@ -30,11 +30,9 @@ class mainWindow(QMainWindow):
         # 初始化变量=================================================
         self.supported_update_channel = getCOSConfJsonObject(TencentCloud.Update.self_update_channel_list_url)
         self.down = None
-        self.clear = None
         self.aria2c_manager = None
         self.chkUp = None
         self.cleanup_thread = None
-        self.run_once = False  # 首次运行 Flag
         self._isUpdate = False
         self.dev_flag = 0
         self.notification = {}
@@ -192,7 +190,6 @@ class mainWindow(QMainWindow):
 
         self.trayMenu.addMenu(self.devMenu)
         # 开发菜单-结束===========================================
-
         self.aboutAction = QAction(self)
         self.aboutAction.setText("关于")
         self.aboutAction.triggered.connect(self.buttonAbout_onClick)
@@ -228,13 +225,14 @@ class mainWindow(QMainWindow):
         # 初始化界面中的配置=============================================
         self.changeChannel(curr_channel)
         self.devMenu.menuAction().setVisible(False)
-        self.stopTime()
+        self.stopTime()  # 按下停止按钮会读取配置，故复用此事件
         # 初始化悬浮窗设置==============================================
         Enable = config.read("gui.json", "floatWindow", "enable", False)
         self.floatWindowAction.setIcon(self.checkIcon) if Enable else self.floatWindowAction.setIcon(self.emptyIcon)
         self.floatWindow = floatWindow(self)
         if Enable:
             self.floatWindow.show()
+            logging.info("[悬浮窗] 悬浮窗已启用")
         # 初始化界面位置配置=============================================
         self.init_pos()
 
@@ -244,10 +242,12 @@ class mainWindow(QMainWindow):
             self.floatWindowAction.setIcon(self.emptyIcon)
             config.write("gui.json", "floatWindow", "enable", False)
             self.floatWindow.hide()
+            logging.info("[悬浮窗] 悬浮窗已禁用")
         else:
             self.floatWindowAction.setIcon(self.checkIcon)
             config.write("gui.json", "floatWindow", "enable", True)
             self.floatWindow.show()
+            logging.info("[悬浮窗] 悬浮窗已启用")
 
     def updateTimer(self):
         if self.TimerSec == 0:
@@ -266,6 +266,8 @@ class mainWindow(QMainWindow):
         self.timer_sec_01.setText(f"{get_digit(Sec, 0)}")
 
     def startTime(self):
+        self.stopButton.setEnabled(True)
+        self.stopAction.setEnabled(True)
         if self.Timer.isActive():
             self.Timer.stop()
             self.startAction.setText("继续")
@@ -288,6 +290,8 @@ class mainWindow(QMainWindow):
         self.timer_min_01.setText(f"{minute}".zfill(2)[1])
         self.timer_sec_10.setText(f"{sec}".zfill(2)[0])
         self.timer_sec_01.setText(f"{sec}".zfill(2)[1])
+        self.stopButton.setEnabled(False)
+        self.stopAction.setEnabled(False)
 
     def register_hotkey_config(self):
         """根据 gui.json 的 hotkey 节点注册全局热键（默认：开始=F8，停止=F9）"""

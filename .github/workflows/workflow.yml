@@ -3,7 +3,7 @@ name: Timer CI
 on:
   push:
     branches:
-      - master
+      - origin
   pull_request:
   workflow_dispatch:
 
@@ -29,9 +29,9 @@ jobs:
           path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
 
-      - name: Create release archive
+      - name: Read application version
         if: github.event_name != 'pull_request'
-        id: package
+        id: app_info
         shell: pwsh
         run: |
           $appInfo = Get-Content data\appInfo.py -Raw
@@ -41,6 +41,56 @@ jobs:
           if ([string]::IsNullOrWhiteSpace($appName) -or [string]::IsNullOrWhiteSpace($version)) {
             throw "Unable to read app_name or ver from data\appInfo.py"
           }
+
+          "app_name=$appName" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Create version tag
+        if: github.event_name != 'pull_request'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ steps.app_info.outputs.version }}"
+          gh api "repos/${{ github.repository }}/git/refs" `
+            --method POST `
+            -f "ref=refs/tags/$tag" `
+            -f "sha=${{ github.sha }}" *> $null
+
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Created tag $tag"
+          } else {
+            gh api "repos/${{ github.repository }}/git/ref/tags/$tag" *> $null
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "Tag $tag already exists; keeping the existing tag"
+            } else {
+              throw "Failed to create or find tag $tag"
+            }
+          }
+
+      - name: Check whether release already exists
+        if: github.event_name != 'pull_request'
+        id: release_check
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "${{ steps.app_info.outputs.version }}" --repo "${{ github.repository }}" *> $null
+          if ($LASTEXITCODE -eq 0) {
+            "exists=true" >> $env:GITHUB_OUTPUT
+          } elseif ($LASTEXITCODE -eq 1) {
+            "exists=false" >> $env:GITHUB_OUTPUT
+          } else {
+            throw "Failed to check whether release '${{ steps.app_info.outputs.version }}' exists"
+          }
+
+      - name: Create release archive
+        if: github.event_name != 'pull_request' && steps.release_check.outputs.exists != 'true'
+        id: package
+        shell: pwsh
+        run: |
+          $appName = "${{ steps.app_info.outputs.app_name }}"
+          $version = "${{ steps.app_info.outputs.version }}"
 
           $archiveName = "${appName}_${version}.zip"
           $staging = Join-Path $env:RUNNER_TEMP "timer-release"
@@ -69,7 +119,7 @@ jobs:
           "notes=$notesPath" >> $env:GITHUB_OUTPUT
 
       - name: Upload release archive
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.release_check.outputs.exists != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: timer-release
@@ -77,7 +127,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub release
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.release_check.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.package.outputs.tag }}

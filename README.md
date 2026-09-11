@@ -95,9 +95,9 @@ Running `build.py` creates the update package; it is not the standalone applicat
 python build.py
 ```
 
-GitHub Actions 只构建独立的 `Timer.exe`，并将其与本文件打包成 `${app_name}_${ver}.zip`；主分支推送或手动运行工作流成功后，会自动创建对应版本的 GitHub Release。更新包需要在本地运行 `build.py` 生成：
+GitHub Actions 只构建独立的 `Timer.exe`，并将其与本文件打包成 `${app_name}_${ver}.zip`；主分支推送或手动运行工作流时，会读取 `data/appInfo.py` 中的版本号并自动创建对应 Git tag，再创建 GitHub Release。如果该 tag 对应的 Release 已存在，则跳过发布，不会更新原 Release。Pull Request 只执行构建。更新包需要在本地运行 `build.py` 生成：
 
-GitHub Actions only builds the standalone `Timer.exe`, packages it together with this README as `${app_name}_${ver}.zip`, and automatically creates the corresponding GitHub Release after a successful push to the main branch or a manual workflow run. The update package must be generated locally with `build.py`:
+GitHub Actions only builds the standalone `Timer.exe`, packages it together with this README as `${app_name}_${ver}.zip`, and automatically creates the corresponding Git tag from `data/appInfo.py` before publishing a GitHub Release on a master push or manual run. If a release already exists for that tag, publishing is skipped and the existing release is not updated. Pull requests only build the executable. The update package must be generated locally with `build.py`:
 
 - `dist/Timer.exe`
 - `Timer_v6.0.2609.11.4.zip`
