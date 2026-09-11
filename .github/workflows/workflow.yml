@@ -3,8 +3,7 @@ name: Timer CI
 on:
   push:
     branches:
-      - main
-      - master
+      - origin
   pull_request:
   workflow_dispatch:
 
