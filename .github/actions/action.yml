@@ -35,8 +35,6 @@ runs:
           throw "Unable to read app_name from data\appInfo.py"
         }
 
-        $outputDir = Join-Path $env:GITHUB_WORKSPACE ".release_build"
-        New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
         $pyinstallerArgs = @(
           "--clean",
           "--noconfirm",
@@ -46,7 +44,6 @@ runs:
           "--icon", (Join-Path $env:GITHUB_WORKSPACE "sources\timer.ico"),
           "--add-data", "$(Join-Path $env:GITHUB_WORKSPACE 'sources');sources",
           "--add-data", "$(Join-Path $env:GITHUB_WORKSPACE 'plugins');plugins",
-          "--distpath", $outputDir,
           (Join-Path $env:GITHUB_WORKSPACE "app.py")
         )
         & python -m PyInstaller @pyinstallerArgs
@@ -54,7 +51,7 @@ runs:
           throw "PyInstaller failed with exit code $LASTEXITCODE"
         }
 
-        $exePath = Join-Path $outputDir "$appName.exe"
+        $exePath = Join-Path $env:GITHUB_WORKSPACE "dist\$appName.exe"
         if (-not (Test-Path $exePath)) {
           Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse -Filter *.exe |
             Select-Object -ExpandProperty FullName

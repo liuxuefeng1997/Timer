@@ -99,8 +99,8 @@ GitHub Actions 只构建独立的 `Timer.exe`，并将其与本文件打包成 `
 
 GitHub Actions only builds the standalone `Timer.exe`, packages it together with this README as `${app_name}_${ver}.zip`, and automatically creates the corresponding GitHub Release after a successful push to the main branch or a manual workflow run. The update package must be generated locally with `build.py`:
 
-- `.release_build/Timer.exe`
-- `.release_build/Timer_v6.0.2609.11.4.zip`
+- `dist/Timer.exe`
+- `Timer_v6.0.2609.11.4.zip`
 
 ## 日志与配置 | Logs and Configuration
 

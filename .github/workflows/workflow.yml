@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: timer-executable
-          path: ${{ github.workspace }}/.release_build/*.exe
+          path: ${{ github.workspace }}/dist/*.exe
           if-no-files-found: error
 
       - name: Create release archive
@@ -46,13 +46,13 @@ jobs:
           $archiveName = "${appName}_${version}.zip"
           $staging = Join-Path $env:RUNNER_TEMP "timer-release"
           New-Item -ItemType Directory -Path $staging -Force | Out-Null
-          $exePath = Join-Path $env:GITHUB_WORKSPACE ".release_build\${appName}.exe"
+          $exePath = Join-Path $env:GITHUB_WORKSPACE "dist\${appName}.exe"
           if (-not (Test-Path $exePath)) {
             throw "Executable not found: $exePath"
           }
           Copy-Item $exePath "$staging\${appName}.exe"
           Copy-Item "README.md" "$staging\README.md"
-          $archivePath = Join-Path $env:GITHUB_WORKSPACE ".release_build\$archiveName"
+          $archivePath = Join-Path $env:GITHUB_WORKSPACE "$archiveName"
           Compress-Archive -Path "$staging\*" -DestinationPath $archivePath -Force
 
           "archive=$archivePath" >> $env:GITHUB_OUTPUT
