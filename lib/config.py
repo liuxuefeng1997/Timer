@@ -44,6 +44,7 @@ class Config:
         """
         conf = self._readJson(os.path.join(self.config_path, config_file))
         value = conf.get(config_session, {}).get(config_item, default_value)
+        self.write(config_file, config_session, config_item, value)
         return value
 
     def write(self, config_file: str, config_session: str, config_item: str, config_value=None):
