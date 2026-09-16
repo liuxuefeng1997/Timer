@@ -11,7 +11,7 @@ class floatWindow(QWidget):
         self.setWindowFlag(Qt.WindowType.WindowTransparentForInput, True)
         self.setWindowFlag(Qt.WindowType.Tool, True)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.resize(260, 111)
+        self.resize(260, 80)
         self.move(0, 0)
         self.parent = _parent
 
