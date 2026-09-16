@@ -40,7 +40,7 @@ class mainWindow(QMainWindow):
         # 初始化aria2c================================================
         self.setup_aria2c()
         # 设置窗口标题和大小============================================
-        self.setWindowTitle(app_name)
+        self.setWindowTitle("Timer 倒计时")
         self.setWindowIcon(self.Icon)
         self.resize(255, 134)
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
@@ -124,7 +124,7 @@ class mainWindow(QMainWindow):
         self.trayMenu.addSeparator()
 
         self.channelMenu = QMenu(self)
-        self.channelMenu.setTitle("切换更新通道")
+        self.channelMenu.setTitle("更新通道")
         self.channelActions = {}
         if self.supported_update_channel:
             for channel, name, enable in self.supported_update_channel:
@@ -146,17 +146,7 @@ class mainWindow(QMainWindow):
 
         # 设置菜单-开始==========================================
         self.optionMenu = QMenu(self)
-        self.optionMenu.setTitle("选项")
-
-        self.timeSettingAction = QAction(self)
-        self.timeSettingAction.setText("时间设置")
-        self.timeSettingAction.triggered.connect(lambda: timeSettingWindow(self).show() if not self.Timer.isActive() else QMessageBox.warning(self, "警告", "请先停止倒计时再更改时间"))
-        self.optionMenu.addAction(self.timeSettingAction)
-
-        self.hotkeySettingAction = QAction(self)
-        self.hotkeySettingAction.setText("热键设置")
-        self.hotkeySettingAction.triggered.connect(lambda: hotkeySettingWindow(self).show())
-        self.optionMenu.addAction(self.hotkeySettingAction)
+        self.optionMenu.setTitle("更多选项")
 
         self.floatWindowAction = QAction(self)
         self.floatWindowAction.setText("悬浮窗")
@@ -204,7 +194,7 @@ class mainWindow(QMainWindow):
 
         self.tray.setContextMenu(self.trayMenu)
         self.tray.activated.connect(self._tray)
-        self.tray.setToolTip(f"{app_name}\n双击：显示/隐藏")
+        self.tray.setToolTip(f"{self.windowTitle()}\n双击：显示/隐藏")
         self.tray.messageClicked.connect(self.on_notification_clicked)
         self.tray.show()
         # 初始化状态栏==================================================
@@ -255,9 +245,9 @@ class mainWindow(QMainWindow):
             self.send_notification("倒计时结束", "时间到了！", 8000)
             return
         self.TimerSec -= 1
-        self.updateGUI(self.TimerSec)
+        self.updateUI(self.TimerSec)
 
-    def updateGUI(self, Time: int):
+    def updateUI(self, Time: int):
         Min = int(Time / 60)
         Sec = Time - (Min * 60)
         self.timer_min_10.setText(f"{get_digit(Min, 1)}")
